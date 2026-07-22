@@ -1,0 +1,25 @@
+# --- Document & data processing ---
+pypdf>=5.0
+pandas>=2.2
+numpy>=1.26
+python-dotenv>=1.0
+
+# --- Agent (RAG + tools) ---
+langchain>=0.3
+langchain-community>=0.3
+langchain-google-genai>=2.0
+langchain-groq>=0.2
+langchain-chroma>=0.1
+chromadb>=0.5
+sentence-transformers>=3.0
+langchain-cohere>=0.3      # optional rerank stage
+langchain-huggingface>=0.1
+langgraph>=0.2
+matplotlib>=3.9            # chart-generation tool
+
+# --- API ---
+fastapi>=0.115
+uvicorn[standard]>=0.30
+fastapi>=0.115
+uvicorn>=0.30
+gradio>=5.0

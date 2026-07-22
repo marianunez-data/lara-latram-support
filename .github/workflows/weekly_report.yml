@@ -1,0 +1,24 @@
+name: Weekly BI report
+
+on:
+  schedule:
+    - cron: "0 13 * * 1"   # every Monday 13:00 UTC
+  workflow_dispatch: {}      # manual trigger for testing
+
+jobs:
+  send-report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install light dependencies (no torch needed for the report)
+        run: pip install pandas matplotlib python-dotenv langchain-core
+      - name: Send report
+        env:
+          REPORT_TO: ${{ secrets.REPORT_TO }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_APP_PASSWORD: ${{ secrets.SMTP_APP_PASSWORD }}
+          ORDERS_SOURCE_URL: ${{ secrets.ORDERS_SOURCE_URL }}
+        run: python -m src.app.weekly_report

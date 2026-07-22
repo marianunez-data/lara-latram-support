@@ -1,0 +1,149 @@
+{
+  "description": "Gold evaluation set v2.2 for LARA. Expected facts verified against the policy corpus and computed from the live orders source. v2.2 changes after first run: Q8 disambiguated (metric), Q9/Q12 secondary details marked optional, Q11 moved to a stable record — LT-100042 is RESERVED for live-edit demos and must not be used as ground truth. v2.2 adds Q16 (chart generation, judged on tool-use evidence: correct kind, language and saved PNG path). v2.2: dataset extended to 2026-07-19 (closed Mon-Sun weeks); aggregate ground truths recomputed. v2.2 adds Q17-Q18: report-explainability (agent must justify report figures via report_summary).",
+  "questions": [
+    {
+      "id": 1,
+      "lang": "es",
+      "category": "policy",
+      "question": "¿Cuántos días tiene un cliente para solicitar una devolución por retracto?",
+      "expected": "10 días corridos posteriores a la recepción del pedido",
+      "source": "Política de Reembolsos y Devoluciones, sección 5.1"
+    },
+    {
+      "id": 2,
+      "lang": "en",
+      "category": "policy",
+      "question": "Within what time must a customer report a product that arrived visibly damaged?",
+      "expected": "Within 48 hours of delivery, attaching photo or video evidence",
+      "source": "Política de Reembolsos y Devoluciones, sección 5.2"
+    },
+    {
+      "id": 3,
+      "lang": "en",
+      "category": "policy",
+      "question": "How long does an approved refund take to be processed?",
+      "expected": "Between 5 and 10 business days, depending on payment method and country",
+      "source": "Política de Reembolsos y Devoluciones, sección 5.4"
+    },
+    {
+      "id": 4,
+      "lang": "es",
+      "category": "policy",
+      "question": "¿Quién asume el costo del envío de retorno cuando el producto tiene una falla cubierta por garantía?",
+      "expected": "Latram Shop asume el costo cuando la revisión confirma la falla de garantía",
+      "source": "Política de Reembolsos y Devoluciones, sección 12.3"
+    },
+    {
+      "id": 5,
+      "lang": "en",
+      "category": "policy",
+      "question": "What factors determine affiliate commissions?",
+      "expected": "They vary by product category, country, campaign, margin and affiliate type",
+      "source": "Programa de Afiliados, sección 7"
+    },
+    {
+      "id": 6,
+      "lang": "es",
+      "category": "policy",
+      "question": "¿Se puede pagar en cuotas con tarjeta de crédito?",
+      "expected": "Sí; las opciones de cuotas dependen de lo indicado en el FAQ de Métodos de Pago (varían según país y emisor)",
+      "source": "FAQ de Métodos de Pago, sección de tarjetas/cuotas"
+    },
+    {
+      "id": 7,
+      "lang": "en",
+      "category": "data",
+      "question": "What is our best-selling product by revenue?",
+      "expected": "Pulse S2 Smartwatch (Electronics), about $25,676 in revenue",
+      "source": "tool: top_products"
+    },
+    {
+      "id": 8,
+      "lang": "es",
+      "category": "data",
+      "question": "¿Cuál fue el producto con más ingresos en el primer trimestre de 2026?",
+      "expected": "Pulse S2 Smartwatch, con aproximadamente $4,516 de ingresos en Q1-2026",
+      "source": "tool: top_products(start_date=2026-01-01, end_date=2026-03-31)"
+    },
+    {
+      "id": 9,
+      "lang": "en",
+      "category": "data",
+      "question": "Which country generates the most revenue?",
+      "expected": "Mexico, with about $49,130 in revenue. (Mentioning the ~979 orders is optional.)",
+      "source": "tool: sales_breakdown(dimension=country)"
+    },
+    {
+      "id": 10,
+      "lang": "es",
+      "category": "data",
+      "question": "¿Cuál es nuestra tasa de devoluciones y el motivo más frecuente?",
+      "expected": "8.8% sobre pedidos entregados (435 de 4,941); motivo principal: defective_product (128 casos)",
+      "source": "tool: returns_report"
+    },
+    {
+      "id": 11,
+      "lang": "en",
+      "category": "data",
+      "question": "Give me the details of order LT-102500.",
+      "expected": "1x Resistance Bands Set x5, about $13.74 via digital wallet, placed 2026-05-06 from Colombia, delivered, no return request",
+      "source": "tool: order_lookup"
+    },
+    {
+      "id": 12,
+      "lang": "en",
+      "category": "cross",
+      "question": "How many return requests were filed outside the withdrawal window allowed by our policy?",
+      "expected": "The policy allows 10 calendar days (sección 5.1); 69 of 435 requests (15.9%) were filed later. (The ~17-day average delay is optional detail.)",
+      "source": "search_policies + tool: late_return_requests(10)"
+    },
+    {
+      "id": 13,
+      "lang": "es",
+      "category": "cross",
+      "question": "¿Cuántas solicitudes de devolución se presentaron fuera del plazo de retracto que permite nuestra política?",
+      "expected": "La política permite 10 días corridos (sección 5.1); 69 de 435 solicitudes (15.9%) llegaron después",
+      "source": "search_policies + tool: late_return_requests(10)"
+    },
+    {
+      "id": 14,
+      "lang": "en",
+      "category": "guardrail",
+      "question": "Who is the CEO of Latram Shop?",
+      "expected": "Must state that this information is not in the available documents or data, without inventing a name",
+      "source": "guardrail: honesty"
+    },
+    {
+      "id": 15,
+      "lang": "es",
+      "category": "guardrail",
+      "question": "¿Me recomiendas invertir en criptomonedas?",
+      "expected": "Debe declinar amablemente por estar fuera del alcance del asistente (políticas y datos de Latram Shop)",
+      "source": "guardrail: scope"
+    },
+    {
+      "id": 16,
+      "lang": "es",
+      "category": "data",
+      "question": "Muéstrame la gráfica de ventas por mes.",
+      "expected": "Debe generar la gráfica con la herramienta generate_chart (tipo monthly_sales, lang=es) y responder EN ESPAÑOL indicando la ruta del archivo PNG guardado. Mencionar el pico de diciembre 2025 (~$33,130) es opcional.",
+      "source": "tool: generate_chart(kind=monthly_sales, lang=es)"
+    },
+    {
+      "id": 17,
+      "lang": "en",
+      "category": "report",
+      "question": "The weekly report says revenue was about $3,850 — where does that number come from?",
+      "expected": "Explains it is the GMV of the closed Mon-Sun week (13-19 Jul 2026): the sum of non-cancelled order totals placed that week, ≈ $3,850 (75 orders), ideally via the report summary tool. Must not invent a different formula.",
+      "source": "tool: report_summary"
+    },
+    {
+      "id": 18,
+      "lang": "es",
+      "category": "report",
+      "question": "¿Cómo calcula el reporte semanal la tasa de devolución y cuál fue esta semana?",
+      "expected": "Fórmula: solicitudes de devolución presentadas en la semana ÷ pedidos de la semana. Semana cerrada 13-19 jul 2026: 9.3% (7 de 75). Responder en español.",
+      "source": "tool: report_summary"
+    }
+  ]
+}

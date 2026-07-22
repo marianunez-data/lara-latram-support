@@ -1,0 +1,20 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Data & artifacts not committed
+data/source/
+data/charts/
+chroma_db/
+*.ipynb_checkpoints/
+
+# OS / IDE
+.DS_Store
+.vscode/
+data/logs/
+data/traces_backup/
