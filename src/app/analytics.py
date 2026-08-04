@@ -138,8 +138,8 @@ def late_return_requests(allowed_days: int) -> str:
     df = _load()
     ret = df[(df["return_request_date"].notna()) &
              (df["return_request_date"] != "")].copy()
-    ret["return_request_date"] = pd.to_datetime(ret["return_request_date"])
-    ret["delivery_date"] = pd.to_datetime(ret["delivery_date"])
+    ret["return_request_date"] = pd.to_datetime(ret["return_request_date"], format="mixed")
+    ret["delivery_date"] = pd.to_datetime(ret["delivery_date"], format="mixed")
     ret["days_after"] = (ret["return_request_date"] - ret["delivery_date"]).dt.days
     late = ret[ret["days_after"] > allowed_days]
     return (f"Of {len(ret)} total return requests, {len(late)} "

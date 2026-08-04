@@ -15,7 +15,10 @@ Claude Desktop config (claude_desktop_config.json):
 
 from __future__ import annotations
 
-from mcp.server.fastmcp import FastMCP
+try:                      # mcp >= 2.0
+    from mcp.server import MCPServer as _Server
+except ImportError:       # mcp 1.x
+    from mcp.server.fastmcp import FastMCP as _Server
 
 from .analytics import (late_return_requests, list_orders, order_lookup,
                         returns_report, sales_breakdown, sales_overview,
@@ -24,7 +27,7 @@ from .charts import generate_chart
 from .retrieval import search_policies
 from .weekly_report import report_summary
 
-mcp = FastMCP("lara-latram-support")
+mcp = _Server("lara-latram-support")
 
 
 @mcp.tool()

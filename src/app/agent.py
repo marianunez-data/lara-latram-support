@@ -68,7 +68,7 @@ question language? If not, rewrite your reply in the user's language."""
 def build_llm():
     """Primary Gemini with automatic Groq fallback (multi-provider resilience)."""
     if not GOOGLE_API_KEY and not GROQ_API_KEY:
-        raise EnvironmentError(
+        raise OSError(
             "No LLM credentials found. Set GOOGLE_API_KEY (and optionally "
             "GROQ_API_KEY as fallback) in your .env file."
         )
@@ -129,7 +129,21 @@ LANGUAGE_REMINDER = (
 )
 
 
-def _log_interaction(question: str, result: dict) -> None:
+def _usage(result: dict) -> dict:
+    """Sum token usage across every LLM call in one agent run.
+
+    LangChain attaches `usage_metadata` to each AIMessage, so a run's real
+    cost is measurable locally — no observability vendor required.
+    """
+    inp = out = 0
+    for m in result.get("messages", []):
+        u = getattr(m, "usage_metadata", None) or {}
+        inp += u.get("input_tokens", 0) or 0
+        out += u.get("output_tokens", 0) or 0
+    return {"input_tokens": inp, "output_tokens": out, "total_tokens": inp + out}
+
+
+def _log_interaction(question: str, result: dict, latency_s: float = 0.0) -> None:
     """Append the question + tools used to a local JSONL audit log.
 
     Powers the weekly report's 'what does the team ask about' section
@@ -154,6 +168,8 @@ def _log_interaction(question: str, result: dict) -> None:
                         "ts": datetime.now(timezone.utc).isoformat(timespec="seconds"),
                         "question": question,
                         "tools": tools,
+                        "latency_s": round(latency_s, 2),
+                        **_usage(result),
                     },
                     ensure_ascii=False,
                 )
@@ -165,8 +181,11 @@ def _log_interaction(question: str, result: dict) -> None:
 
 def ask(agent, question: str) -> str:
     """Single-turn question -> final answer text."""
+    import time
+
+    _t0 = time.perf_counter()
     result = agent.invoke(
         {"messages": [HumanMessage(content=question + LANGUAGE_REMINDER)]}
     )
-    _log_interaction(question, result)
+    _log_interaction(question, result, time.perf_counter() - _t0)
     return content_to_text(result["messages"][-1].content)
