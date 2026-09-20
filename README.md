@@ -7,13 +7,14 @@
 **Try it live:** https://marianunez-data-lara-latram-support.hf.space
 
 Bilingual (ES/EN) AI agent for internal support at Latram Shop (fictional
-LatAm retailer). It answers policy questions **with citations**, analyzes
+Latin American retailer). It answers policy questions **with citations**, analyzes
 **live sales data** from Google Sheets, generates charts, explains and
 emails an interactive **weekly BI report**, and runs deployed on Hugging
 Face — on free-tier infrastructure.
 
 **Stack:** LangGraph ReAct · Gemini 3.5 Flash + Groq fallback ·
-multilingual-E5 + Chroma RAG · FastAPI + Gradio · LangSmith · GitHub Actions.
+multilingual-E5 + Chroma RAG · FastAPI + Gradio · LangSmith · GitHub Actions
+· MCP server.
 
 ---
 
@@ -78,9 +79,11 @@ showing the progression 67% → 93% → 94% across diagnose-and-fix iterations.
 A full run takes about 6 minutes.
 
 The remaining failure is a tool-routing miss on the Spanish
-report-explainability question; its English twin passes. It is documented
-rather than hidden: forcing tool choice would fix it at the cost of agent
-autonomy.
+report-explainability question; its English twin passes. A routing rule in
+the system prompt reduced it, and the next step is a deterministic guard:
+if `report_summary` was called and the answer's figure disagrees with the
+tool's output, the answer does not ship. Documented here rather than
+hidden, with the fix planned.
 
 House rule: **deterministic systems get tested, probabilistic systems get
 evaluated.** The report is pure pandas, so it gets a *double computation*:
@@ -96,16 +99,16 @@ Sheet — triggered every dormant alert branch (threshold chips, country
 concentration, repeat-product flag) and surfaced three real bugs, all fixed:
 currency-formatted cells (`$39.99`) breaking numeric parsing, mixed date
 formats between imported and hand-typed rows, and a silent-fallback
-environment misconfiguration. A sixth was found by re-testing the loader against
+environment misconfiguration.
+
+Three more followed. One was caught in production by the error-handling
+UX, which shows users an apology and engineers a `detail:` breadcrumb. One
+appeared while using the agent as a real user: asking for a *list* of
+in-transit order IDs had no matching tool, and the agent correctly refused
+to invent one — closed with a deterministic `list_orders` tool that
+includes order aging. The last came from re-testing the loader against
 hand-typed rows: the same mixed-date-format bug had survived in
 `late_return_requests`, a function the first sweep missed.
-
-A fourth bug was caught in production by the error-handling UX, which shows
-users an apology and engineers a `detail:` breadcrumb. A fifth gap appeared
-while using the agent as a real user: asking for a *list* of in-transit
-order IDs had no matching tool, and the agent correctly refused to invent
-one — closed with a deterministic `list_orders` tool that includes order
-aging.
 
 ## Guardrails
 
@@ -134,6 +137,13 @@ breaking major version, and the free Spaces tier changed its hardware and
 runtime contract. The deployment now pins its SDK and Python versions
 explicitly, and runtime failures are diagnosed through the public Spaces
 API rather than by guesswork.
+
+The platform kept moving after launch. A later base-image update added
+Node to the Spaces runtime, and `mount_gradio_app` at import time then
+spawned Gradio's SSR server on port 7860 before `launch()` ran, so the real
+app could never bind its port. Fixed by disabling SSR before Gradio is
+imported and skipping the mount on Spaces; the same file still mounts the
+API for Docker and local runs.
 
 ## Operations & limits
 
