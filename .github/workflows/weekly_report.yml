@@ -1,9 +1,7 @@
 name: Weekly BI report
 
 on:
-  schedule:
-    - cron: "0 13 * * 1"   # every Monday 13:00 UTC
-  workflow_dispatch: {}      # manual trigger for testing
+  workflow_dispatch: {}      # manual only: run from the Actions tab
 
 jobs:
   send-report:
